@@ -148,7 +148,7 @@ class StackmatTimer
 
   constructor: (options) ->
     if !@supported()
-      alert("You need a recent browser in order to connect your Stackmat Timer.")
+      alert("You need a recent browser in order to connect your Stackmat Timer.") # TODO plugin should probably not call alert()
       return
 
     @interval = options.interval || 1000 # control how often user wants to be messaged per second
@@ -158,7 +158,7 @@ class StackmatTimer
     @onReset = options.onReset || ->
     @capturing = false
 
-    navigator.webkitGetUserMedia {audio: true}, (stream) =>
+    navigator.webkitGetUserMedia {audio: true}, (stream) => # TODO move to start()?
       microphone = @audioContext().createMediaStreamSource(stream)
       @device = new AudioHardware(microphone, @signalFetched)
 
