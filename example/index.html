@@ -1,0 +1,36 @@
+<html>
+<head>
+  <title>Stackmat.js example</title>
+  <script type="text/javascript" src="../build/stackmat.js"></script>
+  <style>
+    #time {
+      text-align: center;
+      font-weight: bold;
+      font-size: 50px;
+    }
+    #time.running {
+      color: green;
+    }
+    #time.stopped {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    window.onload = function() {
+      var timer = new StackmatTimer({interval: 1000, onRunning: function(s) {
+        document.getElementById("time").className = "running";
+        document.getElementById("time").innerHTML = s.getCurrentTime();
+      }, onStopped: function(s) {
+        document.getElementById("time").className = "stopped";
+        document.getElementById("time").innerHTML = s.getCurrentTime();
+      }});
+
+      timer.start();
+    }
+  </script>
+
+  <div id="time">0:00.00</div>
+</body>
+</html>
