@@ -57,23 +57,19 @@
   })();
 
   StackmatSignalDecoder = (function() {
+    var characterInString, isValidPacket, sumOfDigits,
+      _this = this;
 
     function StackmatSignalDecoder(data) {
       this.decode = __bind(this.decode, this);
-
-      this.isValidPacket = __bind(this.isValidPacket, this);
-
-      this.sumOfDigits = __bind(this.sumOfDigits, this);
-
-      this.characterInString = __bind(this.characterInString, this);
       this.data = data;
     }
 
-    StackmatSignalDecoder.prototype.characterInString = function(character, string) {
+    characterInString = function(character, string) {
       return string.indexOf(character) !== -1;
     };
 
-    StackmatSignalDecoder.prototype.sumOfDigits = function(digits) {
+    sumOfDigits = function(digits) {
       var d, m, values;
       values = (function() {
         var _i, _len, _results;
@@ -89,12 +85,12 @@
       });
     };
 
-    StackmatSignalDecoder.prototype.isValidPacket = function(data) {
-      return this.characterInString(String.fromCharCode(data[0]), "IA SLRC") && this.characterInString(String.fromCharCode(data[1]), "0123456789") && this.characterInString(String.fromCharCode(data[2]), "0123456789") && this.characterInString(String.fromCharCode(data[3]), "0123456789") && this.characterInString(String.fromCharCode(data[4]), "0123456789") && this.characterInString(String.fromCharCode(data[5]), "0123456789") && this.sumOfDigits(data.slice(1, 6)) === data[6] - 64 && this.data[7] === 10 && this.data[8] === 13;
+    isValidPacket = function(data) {
+      return characterInString(String.fromCharCode(data[0]), "IA SLRC") && characterInString(String.fromCharCode(data[1]), "0123456789") && characterInString(String.fromCharCode(data[2]), "0123456789") && characterInString(String.fromCharCode(data[3]), "0123456789") && characterInString(String.fromCharCode(data[4]), "0123456789") && characterInString(String.fromCharCode(data[5]), "0123456789") && sumOfDigits(data.slice(1, 6)) === data[6] - 64 && data[7] === 10 && data[8] === 13;
     };
 
     StackmatSignalDecoder.prototype.decode = function() {
-      if (!this.isValidPacket(this.data)) {
+      if (!isValidPacket(this.data)) {
         return void 0;
       }
       return new StackmatState({
@@ -105,7 +101,7 @@
 
     return StackmatSignalDecoder;
 
-  })();
+  }).call(this);
 
   AudioHardware = (function() {
 
@@ -126,25 +122,15 @@
   })();
 
   RS232Decoder = (function() {
+    var decodeBits, findBeginningOfSignal, floatSignalToBinary, getBitsFromRunLengthEncodedSignal, getPacket, runLengthEncode,
+      _this = this;
 
     function RS232Decoder(data) {
       this.decode = __bind(this.decode, this);
-
-      this.getPacket = __bind(this.getPacket, this);
-
-      this.decodeBits = __bind(this.decodeBits, this);
-
-      this.getBitsFromRunLengthEncodedSignal = __bind(this.getBitsFromRunLengthEncodedSignal, this);
-
-      this.runLengthEncode = __bind(this.runLengthEncode, this);
-
-      this.findBeginningOfSignal = __bind(this.findBeginningOfSignal, this);
-
-      this.floatSignalToBinary = __bind(this.floatSignalToBinary, this);
       this.data = data;
     }
 
-    RS232Decoder.prototype.floatSignalToBinary = function(signal) {
+    floatSignalToBinary = function(signal) {
       if (signal < 0) {
         return 1;
       }
@@ -154,7 +140,7 @@
       return void 0;
     };
 
-    RS232Decoder.prototype.findBeginningOfSignal = function(data) {
+    findBeginningOfSignal = function(data) {
       var bit, i, oneCount, waitingForZero;
       oneCount = 0;
       waitingForZero = false;
@@ -178,7 +164,7 @@
       return void 0;
     };
 
-    RS232Decoder.prototype.runLengthEncode = function(data) {
+    runLengthEncode = function(data) {
       var i, lastBit, result;
       lastBit = -1;
       result = [];
@@ -198,7 +184,7 @@
       return result;
     };
 
-    RS232Decoder.prototype.getBitsFromRunLengthEncodedSignal = function(array, period) {
+    getBitsFromRunLengthEncodedSignal = function(array, period) {
       var bitsCount, e, i, x, _ref;
       x = (function() {
         var _i, _len, _results;
@@ -219,7 +205,7 @@
       return (_ref = []).concat.apply(_ref, x);
     };
 
-    RS232Decoder.prototype.decodeBits = function(data, offset) {
+    decodeBits = function(data, offset) {
       var i, result;
       result = 0;
       i = 0;
@@ -230,11 +216,11 @@
       return result;
     };
 
-    RS232Decoder.prototype.getPacket = function(data) {
+    getPacket = function(data) {
       var i, _i, _results;
       _results = [];
       for (i = _i = 0; _i <= 8; i = ++_i) {
-        _results.push(this.decodeBits(data, i * 10));
+        _results.push(decodeBits(data, i * 10));
       }
       return _results;
     };
@@ -247,27 +233,29 @@
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           e = _ref[_i];
-          _results.push(this.floatSignalToBinary(e));
+          _results.push(floatSignalToBinary(e));
         }
         return _results;
       }).call(this);
-      startIndex = this.findBeginningOfSignal(bits);
-      runLengthEncoded = this.runLengthEncode(bits.slice(startIndex, +(bits.length - 1) + 1 || 9e9));
-      bits = this.getBitsFromRunLengthEncodedSignal(runLengthEncoded, 36.75);
-      return this.getPacket(bits.slice(1, +(bits.length - 1) + 1 || 9e9));
+      startIndex = findBeginningOfSignal(bits);
+      runLengthEncoded = runLengthEncode(bits.slice(startIndex, +(bits.length - 1) + 1 || 9e9));
+      bits = getBitsFromRunLengthEncodedSignal(runLengthEncoded, 36.75);
+      return getPacket(bits.slice(1, +(bits.length - 1) + 1 || 9e9));
     };
 
     return RS232Decoder;
 
-  })();
+  }).call(this);
 
   StackmatTimer = (function() {
+    var audioContext, notTimedOut, supported,
+      _this = this;
 
-    StackmatTimer.prototype.supported = function() {
+    supported = function() {
       return !!(navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
     };
 
-    StackmatTimer.prototype.audioContext = function() {
+    audioContext = function() {
       if (typeof AudioContext === "function") {
         return new AudioContext();
       } else if (typeof webkitAudioContext === "function") {
@@ -284,14 +272,8 @@
 
       this.signalFetched = __bind(this.signalFetched, this);
 
-      this.notTimedOut = __bind(this.notTimedOut, this);
-
-      this.audioContext = __bind(this.audioContext, this);
-
-      this.supported = __bind(this.supported, this);
-
       var _this = this;
-      if (!this.supported()) {
+      if (!supported()) {
         alert("You need a recent browser in order to connect your Stackmat Timer.");
         return;
       }
@@ -304,18 +286,18 @@
         audio: true
       }, function(stream) {
         var microphone;
-        microphone = _this.audioContext().createMediaStreamSource(stream);
+        microphone = audioContext().createMediaStreamSource(stream);
         return _this.device = new AudioHardware(microphone, _this.signalFetched);
       });
     }
 
-    StackmatTimer.prototype.notTimedOut = function() {
+    notTimedOut = function() {
       return true;
     };
 
     StackmatTimer.prototype.signalFetched = function(signal) {
       var decoder, packet, rs232, state;
-      if (this.capturing && this.notTimedOut()) {
+      if (this.capturing && notTimedOut()) {
         rs232 = new RS232Decoder(signal);
         packet = rs232.decode();
         if (packet == null) {
@@ -348,7 +330,7 @@
 
     return StackmatTimer;
 
-  })();
+  }).call(this);
 
   (typeof exports !== "undefined" && exports !== null ? exports : this).StackmatTimer = StackmatTimer;
 

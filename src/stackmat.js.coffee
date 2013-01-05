@@ -26,26 +26,26 @@ class StackmatSignalDecoder
   constructor: (data) ->
     @data = data
 
-  characterInString: (character, string) =>
+  characterInString = (character, string) =>
     string.indexOf(character) != -1
 
-  sumOfDigits: (digits) =>
+  sumOfDigits = (digits) =>
     values = (d - 48 for d in digits)
     m = values.reduce (t, s) -> t + s
 
-  isValidPacket: (data) => # TODO performance
-    @characterInString(String.fromCharCode(data[0]), "IA SLRC") and
-    @characterInString(String.fromCharCode(data[1]), "0123456789") and
-    @characterInString(String.fromCharCode(data[2]), "0123456789") and
-    @characterInString(String.fromCharCode(data[3]), "0123456789") and
-    @characterInString(String.fromCharCode(data[4]), "0123456789") and
-    @characterInString(String.fromCharCode(data[5]), "0123456789") and
-    @sumOfDigits(data[1..5]) == data[6] - 64 and
-    @data[7] == 10 and
-    @data[8] == 13
+  isValidPacket = (data) => # TODO performance
+    characterInString(String.fromCharCode(data[0]), "IA SLRC") and
+    characterInString(String.fromCharCode(data[1]), "0123456789") and
+    characterInString(String.fromCharCode(data[2]), "0123456789") and
+    characterInString(String.fromCharCode(data[3]), "0123456789") and
+    characterInString(String.fromCharCode(data[4]), "0123456789") and
+    characterInString(String.fromCharCode(data[5]), "0123456789") and
+    sumOfDigits(data[1..5]) == data[6] - 64 and
+    data[7] == 10 and
+    data[8] == 13
 
   decode: =>
-    return undefined unless @isValidPacket(@data)
+    return undefined unless isValidPacket(@data)
 
     new StackmatState
       status: @data[0]
@@ -66,14 +66,14 @@ class RS232Decoder
   constructor: (data) ->
     @data = data
 
-  floatSignalToBinary: (signal) =>
+  floatSignalToBinary = (signal) =>
     if signal < 0
       return 1
     if signal > 0
       return 0
     return undefined
 
-  findBeginningOfSignal: (data) =>
+  findBeginningOfSignal = (data) =>
     oneCount = 0
     waitingForZero = false
 
@@ -92,7 +92,7 @@ class RS232Decoder
 
     return undefined
 
-  runLengthEncode: (data) =>
+  runLengthEncode = (data) =>
     lastBit = -1
     result = []
 
@@ -107,14 +107,14 @@ class RS232Decoder
 
     result
 
-  getBitsFromRunLengthEncodedSignal: (array, period) =>
+  getBitsFromRunLengthEncodedSignal = (array, period) =>
     x = ((
       bitsCount = Math.round(e.length / period)
       (e.bit for i in [1..bitsCount])
     ) for e in array)
     [].concat x...
 
-  decodeBits: (data, offset) =>
+  decodeBits = (data, offset) =>
     result = 0
     i = 0
     while i < 8 # TODO rewrite in CoffeeScript
@@ -122,23 +122,23 @@ class RS232Decoder
       i += 1
     result
 
-  getPacket: (data) =>
-    (@decodeBits(data, i * 10) for i in [0..8])
+  getPacket = (data) =>
+    (decodeBits(data, i * 10) for i in [0..8])
 
   decode: =>
-    bits = (@floatSignalToBinary(e) for e in @data)
-    startIndex = @findBeginningOfSignal(bits)
+    bits = (floatSignalToBinary(e) for e in @data)
+    startIndex = findBeginningOfSignal(bits)
 
-    runLengthEncoded = @runLengthEncode(bits[startIndex..(bits.length - 1)])
-    bits = @getBitsFromRunLengthEncodedSignal(runLengthEncoded, 36.75)
-    @getPacket(bits[1..(bits.length - 1)])
+    runLengthEncoded = runLengthEncode(bits[startIndex..(bits.length - 1)])
+    bits = getBitsFromRunLengthEncodedSignal(runLengthEncoded, 36.75)
+    getPacket(bits[1..(bits.length - 1)])
 
 class StackmatTimer
-  supported: =>
+  supported = =>
     !!(navigator.getUserMedia || navigator.webkitGetUserMedia ||
       navigator.mozGetUserMedia || navigator.msGetUserMedia)
 
-  audioContext: =>
+  audioContext = =>
     if (typeof AudioContext == "function")
         new AudioContext()
     else if (typeof webkitAudioContext == "function")
@@ -147,7 +147,7 @@ class StackmatTimer
         throw new Error('AudioContext not supported. :(')
 
   constructor: (options) ->
-    if !@supported()
+    if !supported()
       alert("You need a recent browser in order to connect your Stackmat Timer.") # TODO plugin should probably not call alert()
       return
 
@@ -159,14 +159,14 @@ class StackmatTimer
     @capturing = false
 
     navigator.webkitGetUserMedia {audio: true}, (stream) => # TODO move to start()?
-      microphone = @audioContext().createMediaStreamSource(stream)
+      microphone = audioContext().createMediaStreamSource(stream)
       @device = new AudioHardware(microphone, @signalFetched)
 
-  notTimedOut: =>
+  notTimedOut = =>
     true # TODO @interval < time ...
 
   signalFetched: (signal) =>
-    if @capturing and @notTimedOut()
+    if @capturing and notTimedOut()
       rs232 = new RS232Decoder(signal)
       packet = rs232.decode()
       return unless packet?
