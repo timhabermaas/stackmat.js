@@ -1,11 +1,3 @@
-audioContext =
-  if (typeof AudioContext == "function")
-      new AudioContext()
-  else if (typeof webkitAudioContext == "function")
-      new webkitAudioContext();
-  else
-      throw new Error('AudioContext not supported. :(')
-
 class StackmatState
   constructor: (options) -> # TODO rename options
     @digits = (String.fromCharCode(d) for d in options.digits)
@@ -142,7 +134,23 @@ class RS232Decoder
     @getPacket(bits[1..(bits.length - 1)])
 
 class StackmatTimer
+  supported: =>
+    !!(navigator.getUserMedia || navigator.webkitGetUserMedia ||
+      navigator.mozGetUserMedia || navigator.msGetUserMedia)
+
+  audioContext: =>
+    if (typeof AudioContext == "function")
+        new AudioContext()
+    else if (typeof webkitAudioContext == "function")
+        new webkitAudioContext();
+    else
+        throw new Error('AudioContext not supported. :(')
+
   constructor: (options) ->
+    if !@supported()
+      alert("You need a recent browser in order to connect your Stackmat Timer.")
+      return
+
     @interval = options.interval || 1000 # control how often user wants to be messaged per second
     # is actually timeout
     @onRunning = options.onRunning || ->
@@ -151,7 +159,7 @@ class StackmatTimer
     @capturing = false
 
     navigator.webkitGetUserMedia {audio: true}, (stream) =>
-      microphone = audioContext.createMediaStreamSource(stream)
+      microphone = @audioContext().createMediaStreamSource(stream)
       @device = new AudioHardware(microphone, @signalFetched)
 
   notTimedOut: =>

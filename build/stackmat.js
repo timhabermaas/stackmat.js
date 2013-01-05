@@ -1,16 +1,6 @@
 (function() {
-  var AudioHardware, RS232Decoder, StackmatSignalDecoder, StackmatState, StackmatTimer, audioContext,
+  var AudioHardware, RS232Decoder, StackmatSignalDecoder, StackmatState, StackmatTimer,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  audioContext = (function() {
-    if (typeof AudioContext === "function") {
-      return new AudioContext();
-    } else if (typeof webkitAudioContext === "function") {
-      return new webkitAudioContext();
-    } else {
-      throw new Error('AudioContext not supported. :(');
-    }
-  })();
 
   StackmatState = (function() {
 
@@ -273,6 +263,20 @@
 
   StackmatTimer = (function() {
 
+    StackmatTimer.prototype.supported = function() {
+      return !!(navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+    };
+
+    StackmatTimer.prototype.audioContext = function() {
+      if (typeof AudioContext === "function") {
+        return new AudioContext();
+      } else if (typeof webkitAudioContext === "function") {
+        return new webkitAudioContext();
+      } else {
+        throw new Error('AudioContext not supported. :(');
+      }
+    };
+
     function StackmatTimer(options) {
       this.stop = __bind(this.stop, this);
 
@@ -282,7 +286,15 @@
 
       this.notTimedOut = __bind(this.notTimedOut, this);
 
+      this.audioContext = __bind(this.audioContext, this);
+
+      this.supported = __bind(this.supported, this);
+
       var _this = this;
+      if (!this.supported()) {
+        alert("You need a recent browser in order to connect your Stackmat Timer.");
+        return;
+      }
       this.interval = options.interval || 1000;
       this.onRunning = options.onRunning || function() {};
       this.onStopped = options.onStopped || function() {};
@@ -292,7 +304,7 @@
         audio: true
       }, function(stream) {
         var microphone;
-        microphone = audioContext.createMediaStreamSource(stream);
+        microphone = _this.audioContext().createMediaStreamSource(stream);
         return _this.device = new AudioHardware(microphone, _this.signalFetched);
       });
     }
