@@ -15,7 +15,7 @@ First, create a `StackmatTimer` object and pass in callback functions for when t
     };
     var timer = new StackmatTimer(options);
 
-, then enable capturing input by calling `start`
+then enable capturing input by calling `start`
 
     timer.start();
 
