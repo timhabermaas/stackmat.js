@@ -1,4 +1,10 @@
-audioContext = new webkitAudioContext()
+audioContext =
+  if (typeof AudioContext == "function")
+      new AudioContext()
+  else if (typeof webkitAudioContext == "function")
+      new webkitAudioContext();
+  else
+      throw new Error('AudioContext not supported. :(')
 
 class StackmatState
   constructor: (options) -> # TODO rename options

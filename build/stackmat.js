@@ -2,7 +2,15 @@
   var AudioHardware, RS232Decoder, StackmatSignalDecoder, StackmatState, StackmatTimer, audioContext,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  audioContext = new webkitAudioContext();
+  audioContext = (function() {
+    if (typeof AudioContext === "function") {
+      return new AudioContext();
+    } else if (typeof webkitAudioContext === "function") {
+      return new webkitAudioContext();
+    } else {
+      throw new Error('AudioContext not supported. :(');
+    }
+  })();
 
   StackmatState = (function() {
 
