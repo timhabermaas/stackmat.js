@@ -1,4 +1,6 @@
-class StackmatSignal
+Stackmat = {}
+
+class Stackmat.Signal
   constructor: (options) -> # TODO rename options
     @digits = (String.fromCharCode(d) for d in options.digits)
     digits = (d - 48 for d in options.digits)
@@ -22,7 +24,7 @@ class StackmatSignal
   isReset: ->
     @status == 'I'
 
-class StackmatSignalDecoder
+class Stackmat.SignalDecoder
   characterInString = (character, string) =>
     string.indexOf(character) != -1
 
@@ -44,11 +46,11 @@ class StackmatSignalDecoder
   decode: (data) =>
     return undefined unless isValidPacket(data)
 
-    new StackmatSignal
+    new Stackmat.Signal
       status: data[0]
       digits: data[1..5] # TODO [1..5] duplicated
 
-class AudioHardware
+class Stackmat.AudioHardware
   constructor: (source, callback) ->
     @source = source
     @node = source.context.createJavaScriptNode(4096 * 2, 1, 1) # 36.75 pro bit. 9 bytes, 10 bits/byte => 90 bit => 90*36.75 = 3307 ticks. => min 3307*2 = 6608 ticks
@@ -59,7 +61,7 @@ class AudioHardware
     source.connect(@node)
     @node.connect(source.context.destination)
 
-class RS232Decoder
+class Stackmat.RS232Decoder
   constructor: (ticksPerBit) ->
     @ticksPerBit = ticksPerBit
 
@@ -131,7 +133,7 @@ class RS232Decoder
     bits = getBitsFromRunLengthEncodedSignal(runLengthEncoded, @ticksPerBit)
     getPacket(bits[1..(bits.length - 1)])
 
-class StackmatTimer
+class Stackmat.Timer
   supported = =>
     !!(navigator.getUserMedia || navigator.webkitGetUserMedia ||
       navigator.mozGetUserMedia || navigator.msGetUserMedia)
@@ -154,12 +156,12 @@ class StackmatTimer
     @onReset = options.onReset || ->
     @capturing = false
 
-    @rs232Decoder = new RS232Decoder(audioContext().sampleRate / 1200)
-    @stackmatSignalDecoder = new StackmatSignalDecoder()
+    @rs232Decoder = new Stackmat.RS232Decoder(audioContext().sampleRate / 1200)
+    @stackmatSignalDecoder = new Stackmat.SignalDecoder()
 
     navigator.webkitGetUserMedia {audio: true}, (stream) => # TODO move to start()?
       microphone = audioContext().createMediaStreamSource(stream)
-      @device = new AudioHardware(microphone, @signalFetched)
+      @device = new Stackmat.AudioHardware(microphone, @signalFetched)
 
   signalFetched: (signal) =>
     if @capturing
@@ -182,4 +184,4 @@ class StackmatTimer
   stop: =>
     @capturing = false
 
-(exports ? this).StackmatTimer = StackmatTimer
+(exports ? this).Stackmat = Stackmat
