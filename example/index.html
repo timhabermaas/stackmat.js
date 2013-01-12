@@ -19,7 +19,7 @@
 <body>
   <script>
     window.onload = function() {
-      var timer = new StackmatTimer({interval: 1000, onRunning: function(s) {
+      var timer = new Stackmat.Timer({interval: 1000, onRunning: function(s) {
         document.getElementById("time").className = "running";
         document.getElementById("time").innerHTML = s.getTimeAsString();
       }, onStopped: function(s) {
