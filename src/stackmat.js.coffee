@@ -1,4 +1,4 @@
-class StackmatState
+class StackmatSignal
   constructor: (options) -> # TODO rename options
     @digits = (String.fromCharCode(d) for d in options.digits)
     digits = (d - 48 for d in options.digits)
@@ -44,7 +44,7 @@ class StackmatSignalDecoder
   decode: (data) =>
     return undefined unless isValidPacket(data)
 
-    new StackmatState
+    new StackmatSignal
       status: data[0]
       digits: data[1..5] # TODO [1..5] duplicated
 
