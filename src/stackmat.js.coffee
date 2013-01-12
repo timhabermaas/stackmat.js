@@ -23,9 +23,6 @@ class StackmatState
     @status == 'I'
 
 class StackmatSignalDecoder
-  constructor: (data) ->
-    @data = data
-
   characterInString = (character, string) =>
     string.indexOf(character) != -1
 
@@ -44,17 +41,17 @@ class StackmatSignalDecoder
     data[7] == 10 and
     data[8] == 13
 
-  decode: =>
-    return undefined unless isValidPacket(@data)
+  decode: (data) =>
+    return undefined unless isValidPacket(data)
 
     new StackmatState
-      status: @data[0]
-      digits: @data[1..5] # TODO [1..5] duplicated
+      status: data[0]
+      digits: data[1..5] # TODO [1..5] duplicated
 
 class AudioHardware
   constructor: (source, callback) ->
     @source = source
-    @node = source.context.createJavaScriptNode(4096 * 4, 2, 2)
+    @node = source.context.createJavaScriptNode(4096 * 2, 1, 1) # 36.75 pro bit. 9 bytes, 10 bits/byte => 90 bit => 90*36.75 = 3307 ticks. => min 3307*2 = 6608 ticks
     @callback = callback
     @node.onaudioprocess = (e) =>
       @callback(e.inputBuffer.getChannelData(0))
@@ -63,8 +60,8 @@ class AudioHardware
     @node.connect(source.context.destination)
 
 class RS232Decoder
-  constructor: (data) ->
-    @data = data
+  constructor: (ticksPerBit) ->
+    @ticksPerBit = ticksPerBit
 
   floatSignalToBinary = (signal) =>
     if signal < 0
@@ -73,7 +70,7 @@ class RS232Decoder
       return 0
     return undefined
 
-  findBeginningOfSignal = (data) =>
+  findBeginningOfSignal: (data) =>
     oneCount = 0
     waitingForZero = false
 
@@ -82,7 +79,8 @@ class RS232Decoder
       bit = data[i]
       if bit == 1
         oneCount += 1
-      if oneCount > 1900
+      if oneCount > 9 * @ticksPerBit # there's no byte in a package which contains 8 bits of 1
+                                     # that translates to 9 * ticksPerBit
         waitingForZero = true
       if bit == 0
         oneCount = 0
@@ -125,12 +123,12 @@ class RS232Decoder
   getPacket = (data) =>
     (decodeBits(data, i * 10) for i in [0..8])
 
-  decode: =>
-    bits = (floatSignalToBinary(e) for e in @data)
-    startIndex = findBeginningOfSignal(bits)
+  decode: (data) =>
+    bits = (floatSignalToBinary(e) for e in data)
+    startIndex = @findBeginningOfSignal(bits)
 
     runLengthEncoded = runLengthEncode(bits[startIndex..(bits.length - 1)])
-    bits = getBitsFromRunLengthEncodedSignal(runLengthEncoded, 36.75)
+    bits = getBitsFromRunLengthEncodedSignal(runLengthEncoded, @ticksPerBit)
     getPacket(bits[1..(bits.length - 1)])
 
 class StackmatTimer
@@ -151,28 +149,24 @@ class StackmatTimer
       alert("You need a recent browser in order to connect your Stackmat Timer.") # TODO plugin should probably not call alert()
       return
 
-    @interval = options.interval || 1000 # control how often user wants to be messaged per second
-    # is actually timeout
     @onRunning = options.onRunning || ->
     @onStopped = options.onStopped || ->
     @onReset = options.onReset || ->
     @capturing = false
 
+    @rs232Decoder = new RS232Decoder(audioContext().sampleRate / 1200)
+    @stackmatSignalDecoder = new StackmatSignalDecoder()
+
     navigator.webkitGetUserMedia {audio: true}, (stream) => # TODO move to start()?
       microphone = audioContext().createMediaStreamSource(stream)
       @device = new AudioHardware(microphone, @signalFetched)
 
-  notTimedOut = =>
-    true # TODO @interval < time ...
-
   signalFetched: (signal) =>
-    if @capturing and notTimedOut()
-      rs232 = new RS232Decoder(signal)
-      packet = rs232.decode()
+    if @capturing
+      packet = @rs232Decoder.decode(signal)
       return unless packet?
 
-      decoder = new StackmatSignalDecoder(packet)
-      state = decoder.decode()
+      state = @stackmatSignalDecoder.decode(packet)
       return unless state?
 
       if state.isRunning()
