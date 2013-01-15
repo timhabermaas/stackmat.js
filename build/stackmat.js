@@ -11,6 +11,7 @@
       this.digits = [0, 0, 0, 0, 0];
       this.leftHandPressed = false;
       this.rightHandPressed = false;
+      this.reset = true;
     }
 
     State.prototype.update = function(signal) {
@@ -20,9 +21,15 @@
       switch (status) {
         case " ":
           this.running = true;
+          this.reset = false;
           break;
         case "S":
           this.running = false;
+          this.reset = false;
+          break;
+        case "I":
+          this.running = false;
+          this.reset = true;
           break;
         case "L":
           this.leftHandPressed = true;
@@ -31,13 +38,18 @@
           this.rightHandPressed = true;
           break;
         case "C":
-          this.rightHandPressed = this.leftHandPressed = true;
+          this.leftHandPressed = true;
+          this.rightHandPressed = true;
       }
       return this.digits = signal.getDigits();
     };
 
     State.prototype.isRunning = function() {
       return this.running;
+    };
+
+    State.prototype.isReset = function() {
+      return this.reset;
     };
 
     State.prototype.isLeftHandPressed = function() {

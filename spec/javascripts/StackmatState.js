@@ -62,6 +62,9 @@
     it("isn't running after initialization", function() {
       return expect(state.isRunning()).toBe(false);
     });
+    it("is reset after initialization", function() {
+      return expect(state.isReset()).toBe(true);
+    });
     it("changes to running if the signal state is running", function() {
       state.update(createSignalFromState(" "));
       return expect(state.isRunning()).toBe(true);
@@ -70,6 +73,19 @@
       startTimer();
       state.update(createSignalFromState("S"));
       return expect(state.isRunning()).toBe(false);
+    });
+    it("changes from running to stopped if the timer is being reset", function() {
+      startTimer();
+      state.update(createSignalFromState("I"));
+      return expect(state.isRunning()).toBe(false);
+    });
+    it("is not reset once the timer starts", function() {
+      state.update(createSignalFromState(" "));
+      return expect(state.isReset()).toBe(false);
+    });
+    it("is not reset if the timer is stopped", function() {
+      state.update(createSignalFromState("S"));
+      return expect(state.isReset()).toBe(false);
     });
     return it("doesn't change state if at most one hand touches sensor", function() {
       var left_signal, right_signal;

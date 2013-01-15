@@ -51,6 +51,9 @@ describe "Stackmat.State#update, state", ->
   it "isn't running after initialization", ->
     expect(state.isRunning()).toBe(false)
 
+  it "is reset after initialization", ->
+    expect(state.isReset()).toBe(true)
+
   it "changes to running if the signal state is running", ->
     state.update(createSignalFromState(" "))
     expect(state.isRunning()).toBe(true)
@@ -59,6 +62,19 @@ describe "Stackmat.State#update, state", ->
     startTimer()
     state.update(createSignalFromState("S"))
     expect(state.isRunning()).toBe(false)
+
+  it "changes from running to stopped if the timer is being reset", ->
+    startTimer()
+    state.update(createSignalFromState("I"))
+    expect(state.isRunning()).toBe(false)
+
+  it "is not reset once the timer starts", ->
+    state.update(createSignalFromState(" "))
+    expect(state.isReset()).toBe(false)
+
+  it "is not reset if the timer is stopped", ->
+    state.update(createSignalFromState("S"))
+    expect(state.isReset()).toBe(false)
 
   it "doesn't change state if at most one hand touches sensor", ->
     left_signal = createSignalFromState("L")

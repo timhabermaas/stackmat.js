@@ -6,6 +6,7 @@ class Stackmat.State
     @digits = [0, 0, 0, 0, 0]
     @leftHandPressed = false
     @rightHandPressed = false
+    @reset = true
 
   update: (signal) ->
     @leftHandPressed = @rightHandPressed = false
@@ -15,19 +16,28 @@ class Stackmat.State
     switch status
       when " "
         @running = true
+        @reset = false
       when "S"
         @running = false
+        @reset = false
+      when "I"
+        @running = false
+        @reset = true
       when "L"
         @leftHandPressed = true
       when "R"
         @rightHandPressed = true
       when "C"
-        @rightHandPressed = @leftHandPressed = true
+        @leftHandPressed = true
+        @rightHandPressed = true
 
     @digits = signal.getDigits()
 
   isRunning: ->
     @running
+
+  isReset: ->
+    @reset
 
   isLeftHandPressed: ->
     @leftHandPressed

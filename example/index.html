@@ -23,6 +23,9 @@
         if (state.isRunning()) {
           document.getElementById("time").className = "running";
           document.getElementById("time").innerHTML = state.getTimeAsString();
+        } else if (state.isReset()) {
+          document.getElementById("time").className = "";
+          document.getElementById("time").innerHTML = "Reset";
         } else {
           document.getElementById("time").className = "stopped";
           document.getElementById("time").innerHTML = state.getTimeAsString();
