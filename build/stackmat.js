@@ -4,21 +4,71 @@
 
   Stackmat = {};
 
+  Stackmat.State = (function() {
+
+    function State() {
+      this.running = false;
+      this.digits = [0, 0, 0, 0, 0];
+      this.leftHandPressed = false;
+      this.rightHandPressed = false;
+    }
+
+    State.prototype.update = function(signal) {
+      var status;
+      this.leftHandPressed = this.rightHandPressed = false;
+      status = signal.getStatus();
+      switch (status) {
+        case " ":
+          this.running = true;
+          break;
+        case "S":
+          this.running = false;
+          break;
+        case "L":
+          this.leftHandPressed = true;
+          break;
+        case "R":
+          this.rightHandPressed = true;
+          break;
+        case "C":
+          this.rightHandPressed = this.leftHandPressed = true;
+      }
+      return this.digits = signal.getDigits();
+    };
+
+    State.prototype.isRunning = function() {
+      return this.running;
+    };
+
+    State.prototype.isLeftHandPressed = function() {
+      return this.leftHandPressed;
+    };
+
+    State.prototype.isRightHandPressed = function() {
+      return this.rightHandPressed;
+    };
+
+    State.prototype.getTimeAsString = function() {
+      return "" + this.digits[0] + ":" + this.digits[1] + this.digits[2] + "." + this.digits[3] + this.digits[4];
+    };
+
+    State.prototype.getTimeInMilliseconds = function() {
+      var hundreds, seconds;
+      seconds = this.digits[0] * 60 + this.digits[1] * 10 + this.digits[2];
+      hundreds = this.digits[3] * 10 + this.digits[4];
+      return seconds * 1000 + hundreds * 10;
+    };
+
+    return State;
+
+  })();
+
   Stackmat.Signal = (function() {
 
     function Signal(options) {
-      var d, digits, hundreds, seconds;
+      var d;
+      this.status = String.fromCharCode(options.status);
       this.digits = (function() {
-        var _i, _len, _ref, _results;
-        _ref = options.digits;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          d = _ref[_i];
-          _results.push(String.fromCharCode(d));
-        }
-        return _results;
-      })();
-      digits = (function() {
         var _i, _len, _ref, _results;
         _ref = options.digits;
         _results = [];
@@ -28,30 +78,14 @@
         }
         return _results;
       })();
-      seconds = digits[0] * 60 + digits[1] * 10 + digits[2];
-      hundreds = digits[3] * 10 + digits[4];
-      this.time = seconds * 1000 + hundreds * 10;
-      this.status = String.fromCharCode(options.status);
     }
 
-    Signal.prototype.getTimeInMilliseconds = function() {
-      return this.time;
+    Signal.prototype.getStatus = function() {
+      return this.status;
     };
 
-    Signal.prototype.getTimeAsString = function() {
-      return "" + this.digits[0] + ":" + this.digits[1] + this.digits[2] + "." + this.digits[3] + this.digits[4];
-    };
-
-    Signal.prototype.isRunning = function() {
-      return this.status === ' ';
-    };
-
-    Signal.prototype.isStopped = function() {
-      return this.status === 'S';
-    };
-
-    Signal.prototype.isReset = function() {
-      return this.status === 'I';
+    Signal.prototype.getDigits = function() {
+      return this.digits;
     };
 
     return Signal;
@@ -281,9 +315,11 @@
         return;
       }
       this.onRunning = options.onRunning || function() {};
-      this.onStopped = options.onStopped || function() {};
-      this.onReset = options.onReset || function() {};
+      this.onStopping = options.onStopping || function() {};
+      this.onResetting = options.onResetting || function() {};
+      this.signalReceived = options.signalReceived || function() {};
       this.capturing = false;
+      this.state = new Stackmat.State();
       this.rs232Decoder = new Stackmat.RS232Decoder(audioContext().sampleRate / 1200);
       this.stackmatSignalDecoder = new Stackmat.SignalDecoder();
       navigator.webkitGetUserMedia({
@@ -296,25 +332,18 @@
     }
 
     Timer.prototype.signalFetched = function(signal) {
-      var packet, state;
+      var packet;
       if (this.capturing) {
         packet = this.rs232Decoder.decode(signal);
         if (packet == null) {
           return;
         }
-        state = this.stackmatSignalDecoder.decode(packet);
-        if (state == null) {
+        signal = this.stackmatSignalDecoder.decode(packet);
+        if (signal == null) {
           return;
         }
-        if (state.isRunning()) {
-          this.onRunning(state);
-        }
-        if (state.isStopped()) {
-          this.onStopped(state);
-        }
-        if (state.isReset()) {
-          return this.onReset(state);
-        }
+        this.state.update(signal);
+        return this.signalReceived(this.state);
       }
     };
 

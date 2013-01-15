@@ -1,28 +1,58 @@
 Stackmat = {}
 
-class Stackmat.Signal
-  constructor: (options) -> # TODO rename options
-    @digits = (String.fromCharCode(d) for d in options.digits)
-    digits = (d - 48 for d in options.digits)
-    seconds = digits[0] * 60 + digits[1] * 10 + digits[2]
-    hundreds = digits[3] * 10 + digits[4];
-    @time = seconds * 1000 + hundreds * 10; # TODO -> function
-    @status = String.fromCharCode options.status
+class Stackmat.State
+  constructor: ->
+    @running = false
+    @digits = [0, 0, 0, 0, 0]
+    @leftHandPressed = false
+    @rightHandPressed = false
 
-  getTimeInMilliseconds: ->
-    @time
+  update: (signal) ->
+    @leftHandPressed = @rightHandPressed = false
+
+    status = signal.getStatus() # TODO status vs state is very confusing
+
+    switch status
+      when " "
+        @running = true
+      when "S"
+        @running = false
+      when "L"
+        @leftHandPressed = true
+      when "R"
+        @rightHandPressed = true
+      when "C"
+        @rightHandPressed = @leftHandPressed = true
+
+    @digits = signal.getDigits()
+
+  isRunning: ->
+    @running
+
+  isLeftHandPressed: ->
+    @leftHandPressed
+
+  isRightHandPressed: ->
+    @rightHandPressed
 
   getTimeAsString: ->
     "#{@digits[0]}:#{@digits[1]}#{@digits[2]}.#{@digits[3]}#{@digits[4]}"
 
-  isRunning: ->
-    @status == ' ' # TODO breaks if one pad is touched
+  getTimeInMilliseconds: ->
+    seconds = @digits[0] * 60 + @digits[1] * 10 + @digits[2]
+    hundreds = @digits[3] * 10 + @digits[4]
+    seconds * 1000 + hundreds * 10
 
-  isStopped: ->
-    @status == 'S'
+class Stackmat.Signal
+  constructor: (options) -> # TODO rename options
+    @status = String.fromCharCode options.status
+    @digits = (d - 48 for d in options.digits)
 
-  isReset: ->
-    @status == 'I'
+  getStatus: ->
+    @status
+
+  getDigits: ->
+    @digits
 
 class Stackmat.SignalDecoder
   characterInString = (character, string) =>
@@ -152,9 +182,12 @@ class Stackmat.Timer
       return
 
     @onRunning = options.onRunning || ->
-    @onStopped = options.onStopped || ->
-    @onReset = options.onReset || ->
+    @onStopping = options.onStopping || ->
+    @onResetting = options.onResetting || ->
+    @signalReceived = options.signalReceived || ->
     @capturing = false
+
+    @state = new Stackmat.State()
 
     @rs232Decoder = new Stackmat.RS232Decoder(audioContext().sampleRate / 1200)
     @stackmatSignalDecoder = new Stackmat.SignalDecoder()
@@ -168,15 +201,11 @@ class Stackmat.Timer
       packet = @rs232Decoder.decode(signal)
       return unless packet?
 
-      state = @stackmatSignalDecoder.decode(packet)
-      return unless state?
+      signal = @stackmatSignalDecoder.decode(packet)
+      return unless signal?
 
-      if state.isRunning()
-        @onRunning(state)
-      if state.isStopped()
-        @onStopped(state)
-      if state.isReset()
-        @onReset(state)
+      @state.update(signal)
+      @signalReceived(@state)
 
   start: =>
     @capturing = true
