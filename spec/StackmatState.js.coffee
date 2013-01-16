@@ -38,30 +38,14 @@ describe "Stackmat.State#update, time in milliseconds", ->
     state.update(createSignalFromDigits([1, 3, 0, 2, 8]))
     expect(state.getTimeInMilliseconds()).toBe(90280)
 
-
-describe "Stackmat.State#update, state", ->
+describe "Stackmat.State#update, reset state", ->
   state = undefined
 
   beforeEach ->
     state = new Stackmat.State()
 
-  startTimer = ->
-    state.update(createSignalFromState(" "))
-
-  it "isn't running after initialization", ->
-    expect(state.isRunning()).toBe(false)
-
   it "is reset after initialization", ->
     expect(state.isReset()).toBe(true)
-
-  it "changes to running if the signal state is running", ->
-    state.update(createSignalFromState(" "))
-    expect(state.isRunning()).toBe(true)
-
-  it "changes from running to being stopped", ->
-    startTimer()
-    state.update(createSignalFromState("S"))
-    expect(state.isRunning()).toBe(false)
 
   it "changes from running to stopped if the timer is being reset", ->
     startTimer()
@@ -75,6 +59,28 @@ describe "Stackmat.State#update, state", ->
   it "is not reset if the timer is stopped", ->
     state.update(createSignalFromState("S"))
     expect(state.isReset()).toBe(false)
+
+
+describe "Stackmat.State#update, running state", ->
+  state = undefined
+
+  beforeEach ->
+    state = new Stackmat.State()
+
+  startTimer = ->
+    state.update(createSignalFromState(" "))
+
+  it "isn't running after initialization", ->
+    expect(state.isRunning()).toBe(false)
+
+  it "changes to running if the signal state is running", ->
+    state.update(createSignalFromState(" "))
+    expect(state.isRunning()).toBe(true)
+
+  it "changes from running to being stopped", ->
+    startTimer()
+    state.update(createSignalFromState("S"))
+    expect(state.isRunning()).toBe(false)
 
   it "doesn't change state if at most one hand touches sensor", ->
     left_signal = createSignalFromState("L")
