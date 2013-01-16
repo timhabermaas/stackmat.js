@@ -6,12 +6,10 @@ Stackmat.js is a library for JavaScript which helps you to access the Stackmat T
 Usage
 -----
 
-First, create a `Stackmat.Timer` object and pass in callback functions for when the timer is *running*, has been *stopped* or has been *reset*
+First, create a `Stackmat.Timer` object and pass in a callback function which gets called every time the timer sends a signal — around five times a second.
 
     var options = {
-      onRunning: function(signal) { console.log("Current Time: " + signal.getTimeAsString()) },
-      onStopped: function(signal) { console.log("Timer stopped") },
-      onReset: function(signal) { console.log("Timer reset") }
+      signalReceived: function(state) { console.log("Current Time: " + signal.getTimeAsString()) },
     };
     var timer = new Stackmat.Timer(options);
 
@@ -19,17 +17,13 @@ then enable capturing input by calling `start`
 
     timer.start();
 
-If you don't want your callbacks to be called anymore, call `timer.stop()`.
+If you don't want to receive any further data call `timer.stop()`.
 
-Each callback function gets one argument: The most recent signal of the Stackmat timer — an object of `Stackmat.Signal`. Available methods:
+The `signalReceived` callback gets one argument: The current state of the Stackmat timer. Available methods on it are:
 
     state.getTimeAsString()       // => "0:32.12"
     state.getTimeInMilliseconds() // => 32120
-    state.isRunning()             // => false
-    state.isStopped()             // => true
+    state.isRunning()             // => true
     state.isReset()               // => false
-
-Be aware
---------
-
-The names `onStopped` and `onReset` might suggest that these functions are called exactly once, but that is not the case: Like `onRunning` they are called every time a signal from the Stackmat timer has been received and successfully decoded.
+    state.isLeftHandPressed()     // => true
+    state.isRightHandPressed()    // => false
