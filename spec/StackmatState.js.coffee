@@ -12,6 +12,9 @@ createSignalFromState = (state)->
 createSignalFromDigits = (digits) ->
   createSignal "I", digits
 
+startTimer = (state) ->
+  state.update(createSignalFromState(" "))
+
 describe "Stackmat.State#update, time as string", ->
   state = undefined
 
@@ -48,7 +51,7 @@ describe "Stackmat.State#update, reset state", ->
     expect(state.isReset()).toBe(true)
 
   it "changes from running to stopped if the timer is being reset", ->
-    startTimer()
+    startTimer(state)
     state.update(createSignalFromState("I"))
     expect(state.isRunning()).toBe(false)
 
@@ -67,9 +70,6 @@ describe "Stackmat.State#update, running state", ->
   beforeEach ->
     state = new Stackmat.State()
 
-  startTimer = ->
-    state.update(createSignalFromState(" "))
-
   it "isn't running after initialization", ->
     expect(state.isRunning()).toBe(false)
 
@@ -77,9 +77,14 @@ describe "Stackmat.State#update, running state", ->
     state.update(createSignalFromState(" "))
     expect(state.isRunning()).toBe(true)
 
-  it "changes from running to being stopped", ->
-    startTimer()
+  it "changes from running to stopped if stop signal is received", ->
+    startTimer(state)
     state.update(createSignalFromState("S"))
+    expect(state.isRunning()).toBe(false)
+
+  it "changes from running to stopped if both hands are pressed", ->
+    startTimer(state)
+    state.update(createSignalFromState("C"))
     expect(state.isRunning()).toBe(false)
 
   it "doesn't change state if at most one hand touches sensor", ->

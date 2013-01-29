@@ -27,7 +27,8 @@ class Stackmat.State
         @leftHandPressed = true
       when "R"
         @rightHandPressed = true
-      when "C" # TODO stop timer when both hands cover the stackmat and the timer was running before?
+      when "C"
+        @running = false
         @leftHandPressed = true
         @rightHandPressed = true
 

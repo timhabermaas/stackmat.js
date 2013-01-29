@@ -1,5 +1,5 @@
 (function() {
-  var createSignal, createSignalFromDigits, createSignalFromState;
+  var createSignal, createSignalFromDigits, createSignalFromState, startTimer;
 
   createSignal = function(state, digits) {
     return {
@@ -18,6 +18,10 @@
 
   createSignalFromDigits = function(digits) {
     return createSignal("I", digits);
+  };
+
+  startTimer = function(state) {
+    return state.update(createSignalFromState(" "));
   };
 
   describe("Stackmat.State#update, time as string", function() {
@@ -60,7 +64,7 @@
       return expect(state.isReset()).toBe(true);
     });
     it("changes from running to stopped if the timer is being reset", function() {
-      startTimer();
+      startTimer(state);
       state.update(createSignalFromState("I"));
       return expect(state.isRunning()).toBe(false);
     });
@@ -75,14 +79,11 @@
   });
 
   describe("Stackmat.State#update, running state", function() {
-    var startTimer, state;
+    var state;
     state = void 0;
     beforeEach(function() {
       return state = new Stackmat.State();
     });
-    startTimer = function() {
-      return state.update(createSignalFromState(" "));
-    };
     it("isn't running after initialization", function() {
       return expect(state.isRunning()).toBe(false);
     });
@@ -90,9 +91,14 @@
       state.update(createSignalFromState(" "));
       return expect(state.isRunning()).toBe(true);
     });
-    it("changes from running to being stopped", function() {
-      startTimer();
+    it("changes from running to stopped if stop signal is received", function() {
+      startTimer(state);
       state.update(createSignalFromState("S"));
+      return expect(state.isRunning()).toBe(false);
+    });
+    it("changes from running to stopped if both hands are pressed", function() {
+      startTimer(state);
+      state.update(createSignalFromState("C"));
       return expect(state.isRunning()).toBe(false);
     });
     return it("doesn't change state if at most one hand touches sensor", function() {

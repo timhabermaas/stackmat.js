@@ -38,6 +38,7 @@
           this.rightHandPressed = true;
           break;
         case "C":
+          this.running = false;
           this.leftHandPressed = true;
           this.rightHandPressed = true;
       }
