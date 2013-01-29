@@ -174,17 +174,19 @@ class Stackmat.RS232Decoder
     getPacket(bits[1..(bits.length - 1)])
 
 class Stackmat.Timer
-  supported = =>
-    !!(navigator.getUserMedia || navigator.webkitGetUserMedia ||
-      navigator.mozGetUserMedia || navigator.msGetUserMedia)
+  supported = ->
+    !!(navigator.getUserMedia ||
+       navigator.webkitGetUserMedia ||
+       navigator.mozGetUserMedia ||
+       navigator.msGetUserMedia)
 
   audioContext = =>
     if (typeof AudioContext == "function")
-        new AudioContext()
+      new AudioContext()
     else if (typeof webkitAudioContext == "function")
-        new webkitAudioContext();
+      new webkitAudioContext();
     else
-        throw new Error('AudioContext not supported. :(')
+      throw new Error('AudioContext not supported. :(')
 
   constructor: (options) ->
     if !supported()
@@ -202,7 +204,7 @@ class Stackmat.Timer
     @rs232Decoder = new Stackmat.RS232Decoder(audioContext().sampleRate / 1200)
     @stackmatSignalDecoder = new Stackmat.SignalDecoder()
 
-    navigator.webkitGetUserMedia {audio: true}, (stream) => # TODO move to start()?
+    navigator.webkitGetUserMedia {audio: true}, (stream) => # TODO don't limit to webkit
       microphone = audioContext().createMediaStreamSource(stream)
       @device = new Stackmat.AudioHardware(microphone, @signalFetched)
 
