@@ -66,25 +66,25 @@ class Stackmat.Signal
     @digits
 
 class Stackmat.SignalDecoder
-  characterInString = (character, string) =>
-    string.indexOf(character) != -1
+  characterInString = (character, string) ->
+    string.indexOf(character) isnt -1
 
-  sumOfDigits = (digits) =>
+  sumOfDigits = (digits) ->
     values = (d - 48 for d in digits)
     m = values.reduce (t, s) -> t + s
 
-  isValidPacket = (data) => # TODO performance
+  isValidPacket = (data) -> # TODO performance
     characterInString(String.fromCharCode(data[0]), "IA SLRC") and
     characterInString(String.fromCharCode(data[1]), "0123456789") and
     characterInString(String.fromCharCode(data[2]), "0123456789") and
     characterInString(String.fromCharCode(data[3]), "0123456789") and
     characterInString(String.fromCharCode(data[4]), "0123456789") and
     characterInString(String.fromCharCode(data[5]), "0123456789") and
-    sumOfDigits(data[1..5]) == data[6] - 64 and
-    data[7] == 10 and
-    data[8] == 13
+    sumOfDigits(data[1..5]) is data[6] - 64 and
+    data[7] is 10 and
+    data[8] is 13
 
-  decode: (data) =>
+  decode: (data) ->
     return undefined unless isValidPacket(data)
 
     new Stackmat.Signal
@@ -106,7 +106,7 @@ class Stackmat.RS232Decoder
   constructor: (ticksPerBit) ->
     @ticksPerBit = ticksPerBit
 
-  floatSignalToBinary = (signal) =>
+  floatSignalToBinary = (signal) ->
     if signal < 0
       return 1
     if signal > 0
@@ -120,12 +120,12 @@ class Stackmat.RS232Decoder
     i = 0
     while i < data.length
       bit = data[i]
-      if bit == 1
+      if bit is 1
         oneCount += 1
       if oneCount > 9 * @ticksPerBit # there's no byte in a package which contains 8 bits of 1
                                      # that translates to 9 * ticksPerBit
         waitingForZero = true
-      if bit == 0
+      if bit is 0
         oneCount = 0
         if waitingForZero
           return i
@@ -133,13 +133,13 @@ class Stackmat.RS232Decoder
 
     return undefined
 
-  runLengthEncode = (data) =>
+  runLengthEncode = (data) ->
     lastBit = -1
     result = []
 
     i = 0
     while i < data.length
-      if lastBit != data[i]
+      if lastBit isnt data[i]
         result.push {bit: data[i], length: 1}
         lastBit = data[i]
       else
@@ -148,14 +148,14 @@ class Stackmat.RS232Decoder
 
     result
 
-  getBitsFromRunLengthEncodedSignal = (array, period) =>
+  getBitsFromRunLengthEncodedSignal = (array, period) ->
     x = ((
       bitsCount = Math.round(e.length / period)
       (e.bit for i in [1..bitsCount])
     ) for e in array)
     [].concat x...
 
-  decodeBits = (data, offset) =>
+  decodeBits = (data, offset) ->
     result = 0
     i = 0
     while i < 8 # TODO rewrite in CoffeeScript
@@ -163,7 +163,7 @@ class Stackmat.RS232Decoder
       i += 1
     result
 
-  getPacket = (data) =>
+  getPacket = (data) ->
     (decodeBits(data, i * 10) for i in [0..8])
 
   decode: (data) =>
@@ -176,28 +176,28 @@ class Stackmat.RS232Decoder
 
 class Stackmat.Timer
   supported = ->
-    !!(navigator.getUserMedia ||
-       navigator.webkitGetUserMedia ||
-       navigator.mozGetUserMedia ||
+    !!(navigator.getUserMedia or
+       navigator.webkitGetUserMedia or
+       navigator.mozGetUserMedia or
        navigator.msGetUserMedia)
 
-  audioContext = =>
-    if (typeof AudioContext == "function")
+  audioContext = ->
+    if (typeof AudioContext is "function")
       new AudioContext()
-    else if (typeof webkitAudioContext == "function")
-      new webkitAudioContext();
+    else if (typeof webkitAudioContext is "function")
+      new webkitAudioContext()
     else
       throw new Error('AudioContext not supported. :(')
 
   constructor: (options) ->
-    if !supported()
-      alert("You need a recent browser in order to connect your Stackmat Timer.") # TODO plugin should probably not call alert()
+    if not supported()
+      alert "You need a recent browser in order to connect your Stackmat Timer." # TODO plugin should probably not call alert()
       return
 
-    @onRunning = options.onRunning || ->
-    @onStopping = options.onStopping || ->
-    @onResetting = options.onResetting || ->
-    @signalReceived = options.signalReceived || ->
+    @onRunning = options.onRunning or ->
+    @onStopping = options.onStopping or ->
+    @onResetting = options.onResetting or ->
+    @signalReceived = options.signalReceived or ->
     @capturing = false
 
     @state = new Stackmat.State()
