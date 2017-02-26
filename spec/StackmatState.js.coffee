@@ -6,7 +6,7 @@ createSignal = (state, digits) ->
       digits
   }
 
-createSignalFromState = (state)->
+createSignalFromState = (state) ->
   createSignal state, [0, 0, 0, 0, 0]
 
 createSignalFromDigits = (digits) ->
