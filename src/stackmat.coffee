@@ -178,17 +178,17 @@ class Stackmat.RS232Decoder
 class Stackmat.Timer
   supported = ->
     !!(navigator.getUserMedia or
-       navigator.webkitGetUserMedia or
-       navigator.mozGetUserMedia or
-       navigator.msGetUserMedia)
+      navigator.webkitGetUserMedia or
+      navigator.mozGetUserMedia or
+      navigator.msGetUserMedia)
 
   getUserMedia = ->
     # FIXME : `navigator.getUserMedia` is deprecated. (https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getUserMedia)
     # Must use the new API : `navigator.mediaDevices.getUserMedia` (https://developer.mozilla.org/fr/docs/Web/API/MediaDevices/getUserMedia)
     navigator.getUserMedia or
-       navigator.webkitGetUserMedia or
-       navigator.mozGetUserMedia or
-       navigator.msGetUserMedia
+      navigator.webkitGetUserMedia or
+      navigator.mozGetUserMedia or
+      navigator.msGetUserMedia
 
   audioContext = ->
     try
@@ -204,9 +204,11 @@ class Stackmat.Timer
       alert "You need a recent browser in order to connect your Stackmat Timer."
       return
 
+    # TODO : implement those 3 options
     @onRunning = options.onRunning or ->
     @onStopping = options.onStopping or ->
     @onResetting = options.onResetting or ->
+
     @signalReceived = options.signalReceived or ->
     @capturing = false
 
