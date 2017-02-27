@@ -1,0 +1,47 @@
+{
+  "name": "stackmat.js",
+  "version": "1.0.0",
+  "description": "Access the Stackmat Timer from within JavaScript using the HTML5 Audio API.",
+  "author": {
+    "name": "Tim Habermaas",
+    "url": "https://github.com/timhabermaas"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/timhabermaas/stackmat.js",
+  "bugs": {
+    "url": "https://github.com/timhabermaas/stackmat.js/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imhabermaas/stackmat.js.git"
+  },
+  "keywords": [
+    "rubik's cube",
+    "stackmat",
+    "timer"
+  ],
+  "main": "/build/stackmat.js",
+  "scripts": {
+    "build": "gulp",
+    "test": "gulp test",
+    "test:auto": "gulp test:auto",
+    "example": "gulp demo",
+    "prepublish": "gulp build"
+  },
+  "devDependencies": {
+    "coffee-script": "^1.12.3",
+    "coffeelint": "^1.16.0",
+    "del": "^2.2.2",
+    "gulp": "^3.9.1",
+    "gulp-coffee": "^2.3.3",
+    "gulp-coffeelint": "^0.6.0",
+    "gulp-connect": "^5.0.0",
+    "gulp-util": "^3.0.8",
+    "jasmine-core": "^2.5.2",
+    "karma": "^1.4.1",
+    "karma-coffee-preprocessor": "^1.0.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-phantomjs-launcher": "^1.0.2",
+    "phantomjs": "^2.1.7"
+  }
+}
