@@ -1,6 +1,10 @@
+<!DOCTYPE html>
 <html>
+
 <head>
+  <meta charset="utf-8">
   <title>Stackmat.js Example</title>
+  <meta name="description" content="stackmat.js :Access the Stackmat Timer from within JavaScript using the HTML5 Audio API.">
   <script type="text/javascript" src="./lib/stackmat.js"></script>
   <style>
     #time {
@@ -8,34 +12,41 @@
       font-weight: bold;
       font-size: 50px;
     }
+
     #time.running {
       color: green;
     }
+
     #time.stopped {
       color: red;
     }
   </style>
 </head>
+
 <body>
+  <h1><a href="https://github.com/timhabermaas/stackmat.js">stackmat.js</a> Example</h1>
+  <div id="time">0:00.00</div>
   <script>
-    window.onload = function() {
-      var timer = new Stackmat.Timer({interval: 1000, signalReceived: function(state) {
-        if (state.isRunning()) {
-          document.getElementById("time").className = "running";
-          document.getElementById("time").innerHTML = state.getTimeAsString();
-        } else if (state.isReset()) {
-          document.getElementById("time").className = "";
-          document.getElementById("time").innerHTML = "Reset";
-        } else {
-          document.getElementById("time").className = "stopped";
-          document.getElementById("time").innerHTML = state.getTimeAsString();
+    window.onload = function () {
+      var timer = new Stackmat.Timer({
+        interval: 1000,
+        signalReceived: function (state) {
+          if (state.isRunning()) {
+            document.getElementById("time").className = "running";
+            document.getElementById("time").innerHTML = state.getTimeAsString();
+          } else if (state.isReset()) {
+            document.getElementById("time").className = "";
+            document.getElementById("time").innerHTML = "Reset";
+          } else {
+            document.getElementById("time").className = "stopped";
+            document.getElementById("time").innerHTML = state.getTimeAsString();
+          }
         }
-      }});
+      });
 
       timer.start();
     }
   </script>
-
-  <div id="time">0:00.00</div>
 </body>
+
 </html>
