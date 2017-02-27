@@ -183,6 +183,8 @@ class Stackmat.Timer
        navigator.msGetUserMedia)
 
   getUserMedia = ->
+    # FIXME : `navigator.getUserMedia` is deprecated. (https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getUserMedia)
+    # Must use the new API : `navigator.mediaDevices.getUserMedia` (https://developer.mozilla.org/fr/docs/Web/API/MediaDevices/getUserMedia)
     navigator.getUserMedia or
        navigator.webkitGetUserMedia or
        navigator.mozGetUserMedia or
