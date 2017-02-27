@@ -94,7 +94,8 @@ class Stackmat.SignalDecoder
 class Stackmat.AudioHardware
   constructor: (source, callback) ->
     @source = source
-    @node = source.context.createJavaScriptNode(4096 * 2, 1, 1) # 36.75 pro bit. 9 bytes, 10 bits/byte => 90 bit => 90*36.75 = 3307 ticks. => min 3307*2 = 6608 ticks
+    # 36.75 pro bit. 9 bytes, 10 bits/byte => 90 bit => 90*36.75 = 3307 ticks. => min 3307*2 = 6608 ticks
+    @node = source.context.createJavaScriptNode(4096 * 2, 1, 1)
     @callback = callback
     @node.onaudioprocess = (e) =>
       @callback(e.inputBuffer.getChannelData(0))
@@ -181,17 +182,24 @@ class Stackmat.Timer
        navigator.mozGetUserMedia or
        navigator.msGetUserMedia)
 
+  getUserMedia = ->
+    navigator.getUserMedia or
+       navigator.webkitGetUserMedia or
+       navigator.mozGetUserMedia or
+       navigator.msGetUserMedia
+
   audioContext = ->
-    if (typeof AudioContext is "function")
-      new AudioContext()
-    else if (typeof webkitAudioContext is "function")
-      new webkitAudioContext()
-    else
-      throw new Error('AudioContext not supported. :(')
+    try
+      context = window.AudioContext or window.webkitAudioContext
+      new context()
+    catch error
+      console.error('API Audio not supported. :(', error)
+      throw new Error('API Audio not supported. :(')
 
   constructor: (options) ->
     if not supported()
-      alert "You need a recent browser in order to connect your Stackmat Timer." # TODO plugin should probably not call alert()
+      # TODO plugin should probably not call alert()
+      alert "You need a recent browser in order to connect your Stackmat Timer."
       return
 
     @onRunning = options.onRunning or ->
@@ -205,7 +213,7 @@ class Stackmat.Timer
     @rs232Decoder = new Stackmat.RS232Decoder(audioContext().sampleRate / 1200)
     @stackmatSignalDecoder = new Stackmat.SignalDecoder()
 
-    navigator.webkitGetUserMedia {audio: true}, (stream) => # TODO don't limit to webkit
+    getUserMedia {audio: true}, (stream) =>
       microphone = audioContext().createMediaStreamSource(stream)
       @device = new Stackmat.AudioHardware(microphone, @signalFetched)
 
