@@ -34,6 +34,16 @@ state.isLeftHandPressed();     // => true
 state.isRightHandPressed();    // => false
 ```
 
+More options:
+
+```javascript
+var options = {
+    onNonSupportedBrowser: function(){...},
+    signalReceived: function(state){...}
+}
+```
+
+
 ## Contribute
 
 Build the library:
