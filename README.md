@@ -1,29 +1,59 @@
-Stackmat.js
-===========
+# Stackmat.js
 
 Stackmat.js is a library for JavaScript which helps you to access the Stackmat Timer from your web application.
 
-Usage
------
+## Usage
 
-First, create a `Stackmat.Timer` object and pass in a callback function which gets called every time the timer sends a signal — around five times a second.
+First, create a `Stackmat.Timer` object and pass in a callback function which gets called every time the timer sends a signal - around five times a second.
 
-    var options = {
-      signalReceived: function(state) { console.log("Current Time: " + signal.getTimeAsString()) },
-    };
-    var timer = new Stackmat.Timer(options);
+```javascript
+var options = {
+  signalReceived: function(state) {
+    console.log("Current Time: " + signal.getTimeAsString())
+  }
+};
+var timer = new Stackmat.Timer(options);
+```
 
 then enable capturing input by calling `start`
 
-    timer.start();
+```javascript
+timer.start();
+```
 
 If you don't want to receive any further data call `timer.stop()`.
 
 The `signalReceived` callback gets one argument: The current state of the Stackmat timer. Available methods on it are:
 
-    state.getTimeAsString()       // => "0:32.12"
-    state.getTimeInMilliseconds() // => 32120
-    state.isRunning()             // => true
-    state.isReset()               // => false
-    state.isLeftHandPressed()     // => true
-    state.isRightHandPressed()    // => false
+```javascript
+state.getTimeAsString();       // => "0:32.12"
+state.getTimeInMilliseconds(); // => 32120
+state.isRunning();             // => true
+state.isReset();               // => false
+state.isLeftHandPressed();     // => true
+state.isRightHandPressed();    // => false
+```
+
+## Contribute
+
+Build the library:
+
+```shell
+npm run build
+```
+
+Run tests:
+
+```shell
+npm run test
+
+# or
+
+npm run test:auto
+```
+
+Run the example:
+
+```shell
+npm run example
+```
