@@ -317,7 +317,11 @@
       this.start = bind(this.start, this);
       this.signalFetched = bind(this.signalFetched, this);
       if (!supported()) {
-        alert("You need a recent browser in order to connect your Stackmat Timer.");
+        if (options != null ? options.onNonSuppotedBrowser : void 0) {
+          options.onNonSuppotedBrowser();
+        } else {
+          alert("You need a recent browser in order to connect your Stackmat Timer.");
+        }
         return;
       }
       this.onRunning = options.onRunning || function() {};

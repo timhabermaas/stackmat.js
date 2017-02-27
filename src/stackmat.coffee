@@ -200,8 +200,10 @@ class Stackmat.Timer
 
   constructor: (options) ->
     if not supported()
-      # TODO plugin should probably not call alert()
-      alert "You need a recent browser in order to connect your Stackmat Timer."
+      if options?.onNonSupportedBrowser
+        options.onNonSupportedBrowser()
+      else
+        alert "You need a recent browser in order to connect your Stackmat Timer."
       return
 
     # TODO : implement those 3 options
