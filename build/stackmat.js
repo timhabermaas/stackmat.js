@@ -317,8 +317,8 @@
       this.start = bind(this.start, this);
       this.signalFetched = bind(this.signalFetched, this);
       if (!supported()) {
-        if (options != null ? options.onNonSuppotedBrowser : void 0) {
-          options.onNonSuppotedBrowser();
+        if (options != null ? options.onNonSupportedBrowser : void 0) {
+          options.onNonSupportedBrowser();
         } else {
           alert("You need a recent browser in order to connect your Stackmat Timer.");
         }
