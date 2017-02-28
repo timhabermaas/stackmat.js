@@ -23,7 +23,8 @@ timer.start();
 
 If you don't want to receive any further data call `timer.stop()`.
 
-The `signalReceived` callback gets one argument: The current state of the Stackmat timer. Available methods on it are:
+The `signalReceived` callback gets one argument: The current state of the Stackmat timer.
+Available methods on it are:
 
 ```javascript
 state.getTimeAsString();       // => "0:32.12"
@@ -46,7 +47,18 @@ var options = {
 
 ## Contribute
 
-Build the library:
+You must have [Node.js](https://nodejs.org).
+
+```shell
+# Clone this repository
+git clone git@github.com:timhabermaas/stackmat.js.git
+
+# Install the dependencies
+cd stackmat.js
+npm install
+```
+
+Build the library  (and run tests):
 
 ```shell
 npm run build
