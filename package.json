@@ -38,6 +38,7 @@
     "gulp-connect": "^5.0.0",
     "gulp-header": "^1.8.8",
     "gulp-nsp": "^2.4.2",
+    "gulp-sourcemaps": "2.4.1",
     "gulp-util": "^3.0.8",
     "jasmine-core": "^2.5.2",
     "karma": "^1.4.1",
