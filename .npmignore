@@ -21,3 +21,5 @@ coffeelint.json
 .travis.yml
 .gitignore
 .editorconfig
+
+docs/
