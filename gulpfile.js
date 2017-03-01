@@ -5,6 +5,7 @@ const gutil = require('gulp-util');
 const coffeelint = require('gulp-coffeelint');
 const coffee = require('gulp-coffee');
 const header = require('gulp-header');
+const sourcemaps = require('gulp-sourcemaps');
 const connect = require('gulp-connect');
 const gulpNSP = require('gulp-nsp');
 const karma = require('karma');
@@ -32,10 +33,12 @@ function buildCoffee(dest) {
   gulp.src(`./${paths.src}/*.coffee`)
     .pipe(coffeelint())
     .pipe(coffeelint.reporter())
+    .pipe(sourcemaps.init())
     .pipe(coffee({
       bare: false
     }).on('error', gutil.log))
     .pipe(header(banner, { pkg: pkg, date: new Date() } ))
+    .pipe(sourcemaps.write())
     .pipe(gulp.dest(dest));
 }
 
