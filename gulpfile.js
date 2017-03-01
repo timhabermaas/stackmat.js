@@ -4,8 +4,9 @@ const gulp = require('gulp');
 const gutil = require('gulp-util');
 const coffeelint = require('gulp-coffeelint');
 const coffee = require('gulp-coffee');
-const karma = require('karma');
 const connect = require('gulp-connect');
+const gulpNSP = require('gulp-nsp');
+const karma = require('karma');
 
 const paths = {
   src: 'src',
@@ -39,7 +40,7 @@ function runTests(singleRun, done) {
     autoWatch: !singleRun
   };
 
-  const server = new karma.Server(localConfig, function (failCount) {
+  const server = new karma.Server(localConfig, function(failCount) {
     done(failCount ? new Error(`Failed ${failCount} tests.`) : null);
   });
   server.start();
@@ -49,31 +50,37 @@ function buildExample() {
   buildCoffee(`./${paths.demo}/lib/`);
 }
 
-gulp.task('test', function (done) {
+gulp.task('nsp', function(cb) {
+  gulpNSP({
+    package: __dirname + '/package.json'
+  }, cb);
+});
+
+gulp.task('test', function(done) {
   runTests(true, done);
 });
 
-gulp.task('test:auto', function (done) {
+gulp.task('test:auto', function(done) {
   runTests(false, done);
 });
 
 gulp.task('build', build);
 gulp.task('clean', clean);
-gulp.task('default', ['clean', 'build']);
+gulp.task('default', ['nsp', 'clean', 'build']);
 
-gulp.task('connect', function () {
+gulp.task('connect', function() {
   connect.server({
     root: paths.demo,
     livereload: true
   });
 });
 
-gulp.task('html', function () {
+gulp.task('html', function() {
   gulp.src(`./${paths.demo}/*.html`)
     .pipe(connect.reload());
 });
 
-gulp.task('watch', function () {
+gulp.task('watch', function() {
   gulp.watch([`./${paths.demo}/*.html`], ['html']);
 });
 
