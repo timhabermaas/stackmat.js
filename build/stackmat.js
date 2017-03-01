@@ -1,3 +1,9 @@
+/**
+ * stackmat.js - Access the Stackmat Timer from within JavaScript using the HTML5 Audio API.
+ * @version v1.0.0 - Wed Mar 01 2017 20:04:38 GMT+0100 (CET)
+ * @link https://github.com/timhabermaas/stackmat.js
+ * @license MIT
+ */
 (function() {
   var Stackmat,
     bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };

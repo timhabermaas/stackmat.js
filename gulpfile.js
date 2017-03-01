@@ -4,15 +4,25 @@ const gulp = require('gulp');
 const gutil = require('gulp-util');
 const coffeelint = require('gulp-coffeelint');
 const coffee = require('gulp-coffee');
+const header = require('gulp-header');
 const connect = require('gulp-connect');
 const gulpNSP = require('gulp-nsp');
 const karma = require('karma');
+const pkg = require('./package.json');
 
 const paths = {
   src: 'src',
   dist: 'build',
   demo: 'example'
 };
+
+const banner = ['/**',
+  ' * <%= pkg.name %> - <%= pkg.description %>',
+  ' * @version v<%= pkg.version %> - <%= date %>',
+  ' * @link <%= pkg.homepage %>',
+  ' * @license <%= pkg.license %>',
+  ' */',
+  ''].join('\n');
 
 function clean() {
   return del([`./${paths.dist}`]);
@@ -25,6 +35,7 @@ function buildCoffee(dest) {
     .pipe(coffee({
       bare: false
     }).on('error', gutil.log))
+    .pipe(header(banner, { pkg: pkg, date: new Date() } ))
     .pipe(gulp.dest(dest));
 }
 
