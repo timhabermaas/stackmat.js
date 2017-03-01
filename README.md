@@ -1,7 +1,7 @@
 # Stackmat.js
 
 [![Build Status](https://travis-ci.org/timhabermaas/stackmat.js.svg?branch=master)](https://travis-ci.org/timhabermaas/stackmat.js)
-[![npm version](https://badge.fury.io/js/stackmat.js.svg)](https://badge.fury.io/js/stackmat.js)
+[![npm version](https://badge.fury.io/js/stackmat.js.svg)](https://www.npmjs.com/package/stackmat.js)
 
 Stackmat.js is a library for JavaScript which helps you to access the Stackmat Timer from your web application.
 
