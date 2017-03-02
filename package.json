@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/imhabermaas/stackmat.js.git"
+    "url": "git+https://github.com/timhabermaas/stackmat.js.git"
   },
   "keywords": [
     "rubik's cube",
