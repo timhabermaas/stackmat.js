@@ -5,6 +5,8 @@
 
 Stackmat.js is a library for JavaScript which helps you to access the Stackmat Timer from your web application.
 
+Demo: http://timhabermaas.github.io/stackmat.js/
+
 ## Usage
 
 First, create a `Stackmat.Timer` object and pass in a callback function which gets called every time the timer sends a signal - around five times a second.
