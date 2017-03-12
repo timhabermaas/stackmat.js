@@ -14,7 +14,8 @@ const pkg = require('./package.json');
 const paths = {
   src: 'src',
   dist: 'build',
-  demo: 'example'
+  example: 'example',
+  demo: 'docs'
 };
 
 const banner = ['/**',
@@ -23,7 +24,8 @@ const banner = ['/**',
   ' * @link <%= pkg.homepage %>',
   ' * @license <%= pkg.license %>',
   ' */',
-  ''].join('\n');
+  ''
+].join('\n');
 
 function clean() {
   return del([`./${paths.dist}`]);
@@ -37,7 +39,10 @@ function buildCoffee(dest) {
     .pipe(coffee({
       bare: false
     }).on('error', gutil.log))
-    .pipe(header(banner, { pkg: pkg, date: new Date() } ))
+    .pipe(header(banner, {
+      pkg: pkg,
+      date: new Date()
+    }))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest(dest));
 }
@@ -60,15 +65,13 @@ function runTests(singleRun, done) {
   server.start();
 }
 
-function buildExample() {
-  buildCoffee(`./${paths.demo}/lib/`);
-}
-
-gulp.task('nsp', function(cb) {
+function nsp(cb) {
   gulpNSP({
     package: __dirname + '/package.json'
   }, cb);
-});
+}
+
+gulp.task('nsp', nsp);
 
 gulp.task('test', function(done) {
   runTests(true, done);
@@ -82,21 +85,49 @@ gulp.task('build', build);
 gulp.task('clean', clean);
 gulp.task('default', ['nsp', 'clean', 'build']);
 
+/**
+ * section: Example build and run
+ */
+
+function buildExample() {
+  buildCoffee(`./${paths.example}/lib/`);
+}
+
+function cleanExample() {
+  return del([`./${paths.example}/lib`]);
+}
+
 gulp.task('connect', function() {
   connect.server({
-    root: paths.demo,
+    root: paths.example,
     livereload: true
   });
 });
 
 gulp.task('html', function() {
-  gulp.src(`./${paths.demo}/*.html`)
+  gulp.src(`./${paths.example}/*.html`)
     .pipe(connect.reload());
 });
 
 gulp.task('watch', function() {
-  gulp.watch([`./${paths.demo}/*.html`], ['html']);
+  gulp.watch([`./${paths.example}/*.html`], ['html']);
 });
 
-gulp.task('example:build', buildExample);
+gulp.task('example:clean', cleanExample);
+gulp.task('example:build', ['example:clean'], buildExample);
 gulp.task('example', ['example:build', 'connect', 'watch']);
+
+/**
+ * section: Demo build
+ */
+
+function buildDemo() {
+  buildCoffee(`./${paths.demo}/lib/`);
+}
+
+function cleanDemo() {
+  return del([`./${paths.demo}/lib`]);
+}
+
+gulp.task('demo:clean', cleanDemo);
+gulp.task('demo', ['demo:clean'], buildDemo);

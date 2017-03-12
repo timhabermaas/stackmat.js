@@ -26,6 +26,7 @@
     "test": "gulp test",
     "test:auto": "gulp test:auto",
     "example": "gulp example",
+    "demo": "gulp demo",
     "prepublish": "gulp build"
   },
   "devDependencies": {
