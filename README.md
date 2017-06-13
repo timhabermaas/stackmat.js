@@ -7,17 +7,25 @@ Stackmat.js is a library for JavaScript which helps you to access the Stackmat T
 
 Demo: http://timhabermaas.github.io/stackmat.js/
 
+## Installation
+```shell
+npm install stackmat.js
+```
+
 ## Usage
 
 First, create a `Stackmat.Timer` object and pass in a callback function which gets called every time the timer sends a signal - around five times a second.
 
 ```javascript
-var options = {
-  signalReceived: function(state) {
+import { Stackmat } from 'stackmat.js';
+
+const options = {
+  signalReceived(state) {
     console.log("Current Time: " + signal.getTimeAsString())
   }
 };
-var timer = new Stackmat.Timer(options);
+
+const timer = new Stackmat.Timer(options);
 ```
 
 then enable capturing input by calling `start`
@@ -43,9 +51,9 @@ state.isRightHandPressed();    // => false
 More options:
 
 ```javascript
-var options = {
-    onNonSupportedBrowser: function(){...},
-    signalReceived: function(state){...}
+const options = {
+    onNonSupportedBrowser(){...},
+    signalReceived(state){...}
 }
 ```
 
