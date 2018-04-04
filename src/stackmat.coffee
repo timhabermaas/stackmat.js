@@ -66,8 +66,8 @@ class Stackmat.Signal
     @digits
 
 class Stackmat.SignalDecoder
-  characterInString = (character, string) ->
-    string.indexOf(character) isnt -1
+  characterInString = (character, value) ->
+    value.indexOf(character) isnt -1
 
   sumOfDigits = (digits) ->
     values = (d - 48 for d in digits)
@@ -95,7 +95,7 @@ class Stackmat.AudioHardware
   constructor: (source, callback) ->
     @source = source
     # 36.75 pro bit. 9 bytes, 10 bits/byte => 90 bit => 90*36.75 = 3307 ticks. => min 3307*2 = 6608 ticks
-    @node = source.context.createJavaScriptNode(4096 * 2, 1, 1)
+    @node = source.context.createScriptProcessor(4096 * 2, 1, 1)
     @callback = callback
     @node.onaudioprocess = (e) =>
       @callback(e.inputBuffer.getChannelData(0))
@@ -219,9 +219,17 @@ class Stackmat.Timer
     @rs232Decoder = new Stackmat.RS232Decoder(audioContext().sampleRate / 1200)
     @stackmatSignalDecoder = new Stackmat.SignalDecoder()
 
-    getUserMedia {audio: true}, (stream) =>
+    success = (stream) =>
       microphone = audioContext().createMediaStreamSource(stream)
       @device = new Stackmat.AudioHardware(microphone, @signalFetched)
+
+    fail = (err) ->
+      console.log "Fail to connect to audio device", err
+
+    if navigator.mediaDevices and navigator.mediaDevices.getUserMedia
+      navigator.mediaDevices.getUserMedia({audio: {optional: [{echoCancellation: false}]}}).then(success).catch(fail)
+    else
+      getUserMedia().call navigator, {audio: {optional: [{echoCancellation: false}]}}, success, fail
 
   signalFetched: (signal) =>
     if @capturing
