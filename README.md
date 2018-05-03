@@ -21,7 +21,7 @@ import { Stackmat } from 'stackmat.js';
 
 const options = {
   signalReceived(state) {
-    console.log("Current Time: " + signal.getTimeAsString())
+    console.log("Current Time: " + state.getTimeAsString())
   }
 };
 
